@@ -1,10 +1,10 @@
 
 /**
- * AES-128 EBC encryption/decryption 
+ * AES-128 ECB encryption/decryption 
  * 
  * Other required libs: 
 	- CryptoJS_AES.js
-	- Files_1.2.js
+	- Files_1.5.js
 	
  * How to use: 
 	var keyStr = "b946744f6b5ede4bb021c0a7bea9b303";

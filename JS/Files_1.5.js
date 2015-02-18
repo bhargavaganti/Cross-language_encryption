@@ -1,7 +1,7 @@
-	
+
 /**
  * Lib for manipulating blob and base64 & sending AJAX requests
- * version: 1.2 (08.09.14)
+ * version: 1.5 (08.12.14)
  * 
  * @autor: Constantine Oupirum
  * MIT license: https://googledrive.com/host/0B2JzwD3Qc8A8QkZHMktnaExiaTg
@@ -10,7 +10,7 @@ var Files = {
 	/**
 	 * Get Blob data by URL
 	 * @param url - file URL
-	 * @param onSuccess - success callbac. Will be invoked with Blob object argument
+	 * @param onSuccess - success callback. Will be invoked with Blob object argument
 	 * @param onError - error callback. Will be invoked with error message argument
 	 */
 	getBlob: function(url, onSuccess, onError) {
@@ -108,7 +108,7 @@ var Files = {
 			save.dispatchEvent(event);
 			(URL || webkitURL).revokeObjectURL(save.href);
 		}
-		else if (!!ActiveXObject && document.execCommand)	 {
+		else if (!!window.ActiveXObject && document.execCommand)	 {
 			var _window = open(fileUrl, '_blank');
 			_window.document.close();
 			_window.document.execCommand('SaveAs', true, fileName || fileUrl);
@@ -177,75 +177,157 @@ var Files = {
 		}
 	},
 	
+	trimBase64: function(base64Str) {
+		return base64Str.replace(/^(.*)[,]/, '');
+	},
+	
 	/**
 	 * Send HTTP request (AJAX)
 	 * @param url - request URL (string)
 	 * @param method - request method (POST or GET) (string)
-	 * @param postData - POST data (for post request only). String or FormData object
-	 * @param responseType - request response type (text, arraybuffer, blob, or document) (string)
-	 * @param onSuccess - success callback. Will be invoked with response argument
+	 * @param postData - POST data (for post request only). FormData or string
+	 * @param responseType - request response type (text, blob, arraybuffer or document) (string)
+	 * @param onSuccess - success callback. Will be invoked with two args: response data & response headers object
 	 * @param onError - error callback. Will be invoked with error message argument (optional)
 	 * @param onUploadProgress - callback for uploading progress change. Argument - percents float number. (optional)
 	 * @param onLoadProgress - callback for loading progress change. Argument - precents float number. (optional)
+	 * @return XMLHttpRequest object
 	 */
-	httpReq: function(url, method, postData, responseType, onSuccess, onError, onUploadProgress, onLoadProgress) {
-		var request = Files.getXmlHttp();
-		request.open(method, url, true);
-		if (responseType) request.responseType = responseType || "text";
-		if (method.toUpperCase() === "POST") {
-			if (typeof(postData) === "object") {
-				//request.setRequestHeader("Content-type", "multipart/form-data");
-			}
-			else if (typeof(postData)=== "string") {
-				request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+	httpReq: function(url, method, postData, rt, onSuccess, onError, onUploadProgress, onLoadProgress) {
+    	function _onupload(e) {
+			if (e && e.lengthComputable && onUploadProgress) {
+				onUploadProgress((e.loaded / e.total) * 100);
 			}
 		}
-		//responseType: "text", "arraybuffer", "blob", or "document"
-		
-		request.upload.onprogress = function(e) {
-			if (e.lengthComputable) {
-				if (onUploadProgress) onUploadProgress((e.loaded / e.total) * 100);
-			}
-		};
-		request.onprogress = function(e) {
-			if (onLoadProgress) {
+		function _onloadprogress(e) {
+			if (e && onLoadProgress) {
 				onLoadProgress((e.loaded / e.total) * 100);
 			}
-		};
+		}
+		function _onload() {
+			if (request.readyState == 4) {
+				if (request.status == 200) {
+					if (onSuccess) {
+						var resp = request.response || request.responseText;
+						onSuccess(resp, Files.getHeaders(request));
+					}
+				}
+				else {
+					request.status = request.status || 0;
+					request.statusText = request.statusText || "Unknown";
+					_onerror(request.status + " " + request.statusText);
+				}
+			}
+		}
+		function _onerror(e) {
+			console.warn("httpReq error:", e);
+			if (onError) {
+				var status = request.status + (request.statusText ? ("; " + request.statusText) : "");
+				onError(status);
+			}
+		}
 		
-		request.onload = function(e) {
-			if (request.status == 200) {
-				if (onSuccess) onSuccess(request.response);
+		var request = Files.getXmlHttp();
+		if (request != null) {
+			method = (method.toUpperCase() == "POST") ? "POST" : "GET";
+			request.open(method, url, true);
+			
+			request.responseType = (rt == "blob")
+					? "blob" : (rt == "document")
+							? "document" : (rt == "arraybuffer")
+									? "arraybuffer" : "text";
+			
+			if (request.setRequestHeader) {
+				request.setRequestHeader("Access-Control-Request-Method", "POST, GET");
+				request.setRequestHeader("Access-Control-Request-Headers", "x-requested-with");
+				
+				if (method == "POST") {
+					//request.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+					
+					// FormData:
+					if (typeof(postData) == "object") {
+						//request.setRequestHeader("Content-type", "multipart/form-data");
+					}
+					// POST data as string (&var=value):
+					else if (typeof(postData) == "string") {
+						request.setRequestHeader("Content-type",
+								"application/x-www-form-urlencoded");
+					}
+				}
+			}
+			
+			if (method != "POST") {
+				postData = null;
+			}
+			
+			if ("onload" in request) {
+				request.onload = _onload;
 			}
 			else {
-				console.warn("request.onload", request.status);
-				if (onError) onError(request.status);
+				request.onreadystatechange = _onload;
 			}
-		};
+			
+			if (("upload" in request) && ("onprogress" in request.upload)) {
+				request.upload.onprogress = _onupload;
+			}
+			
+			if ("onprogress" in request) {
+				request.onprogress = _onloadprogress;
+			}
+			
+			request.onerror = _onerror;
+			
+			request.send(postData);
+		}
+		else {
+			request = { status: 0, statusText: "xmlHttpRequest is not supported" };
+			_onerror("xmlHttpRequest is not supported");
+		}
 		
-		request.onerror = function(e) {
-			console.warn("httpReq() > onerror(): ", e, "status: " + request.status);
-			if (!request.status) request.status = "Unknown";
-			if (onError) onError(request.status);
-		};
-		
-		request.send(postData);
+		return request;
 	},
+	
 	getXmlHttp: function() {
 		var xmlHttp = null;
-		if (XMLHttpRequest) {
-			xmlHttp = new XMLHttpRequest();
-		}
-		else if (ActiveXObject) {
-			xmlHttp = new ActiveXObject("Microsoft.XMLHTTP");
-		}
+		
+		xmlHttp = ( ((typeof(XMLHttpRequest) != "undefined") && new XMLHttpRequest())
+				|| ( (typeof(ActiveXObject) != "undefined")
+						&& (new ActiveXObject('Msxml2.XMLHTTP')
+								|| new ActiveXObject('Microsoft.XMLHTTP')) )
+				|| null );
+		
+		// Как же заебал этот IE
+		
 		return xmlHttp;
 	},
 	
-	trimBase64: function(base64Str) {
-		return base64Str.replace(/^(.*)[,]/, '');
+	getHeaders: function(request) {
+		var headers = {};
+		
+		if (request && request.getAllResponseHeaders) {
+			var hTxt = request.getAllResponseHeaders();
+			var ls = /^\s*/;
+			var ts = /\s*$/;
+			
+			var lines = hTxt.split("\n");
+			for (var i = 0; i < lines.length; i++) {
+				var l = lines[i];
+				if (l.lenght < 3) 
+					continue;
+				
+				var pos = l.indexOf(":");
+				var name = l.substring(0, pos).replace(ls, "").replace(ts, "");
+				var value = l.substring(pos+1).replace(ls, "").replace(ts, "");
+				
+				headers[name] = value;
+			}
+		}
+		else {
+			console.warn("Files.getHeaders() ", "could not get response headers");
+		}
+		
+		return headers;
 	}
 };
-
 
 

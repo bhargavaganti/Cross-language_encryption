@@ -5,17 +5,17 @@ using System.Security.Cryptography;
 using System.Text;
 
 
-/*
- * AES encryption/decryption byte data. 
+/**
+ * AES encryption/decryption for byte arrays. 
  * Key len - 32 char. 
  
  * How to use: 
-	string data = "123 wert 123";
-	AES_128 encrypt = new AES_128("ABC12345123451234512345123451234");
-	byte[] encr = encrypt.encrypt(Encoding.UTF8.GetBytes(data));
+	string data = "123 wert путин ест детей";
+	AES_128 aes = new AES_128("ABC12345123451234512345123451234");
+	byte[] encr = aes.encrypt(Encoding.UTF8.GetBytes(data));
 	Console.WriteLine("encrypted base64: " + Convert.ToBase64String(encr));
 	
-	byte[] decr = encrypt.decrypt(encr);
+	byte[] decr = aes.decrypt(encr);
 	Console.WriteLine("decrypted: " + Encoding.UTF8.GetString(decr));
  */
 class AES_128 {
@@ -31,7 +31,7 @@ class AES_128 {
 		try {
 			res = this.encryptBytesAES128(data);
 		} catch(Exception e) {
-			Console.WriteLine("Error AES encryption: " + e.Message);
+			Console.WriteLine("Error on AES encryption: " + e.Message);
 		}
 		
 		return res;
@@ -43,7 +43,7 @@ class AES_128 {
 		try {
 			res = this.decryptBytesAES128(encryptedData);
 		} catch(Exception e) {
-			Console.WriteLine("Error AES decryption: " + e.Message);
+			Console.WriteLine("Error on AES decryption: " + e.Message);
 		}
 		
 		return res;
@@ -80,14 +80,15 @@ class AES_128 {
 }
 
 
+
 /*
- * RSA encryption/decryption byte data. 
+ * RSA encryption/decryption for byte arrays. 
  
  * How to use: 
 	string publicKey = "-----BEGIN PUBLIC KEY-----MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCCSJhJ0Uws0gpESsZY4IuQbg9Xp1wks09cExmp3QEwsJNefF6c9j65n7iwGy3PRt8RwVo5kbaqliQMB6k5DLPbUD2wa+XKGlId8YrX6MHEADKy2WIVjAg0WI9ie0EG3OUJDtFqOxsD7AWTWwsF5XYKvw30cqe5JlPxpSRnXuM5kwIDAQAB-----END PUBLIC KEY-----";
 	string privateKey = "-----BEGIN RSA PRIVATE KEY-----MIICWwIBAAKBgQCCSJhJ0Uws0gpESsZY4IuQbg9Xp1wks09cExmp3QEwsJNefF6c9j65n7iwGy3PRt8RwVo5kbaqliQMB6k5DLPbUD2wa+XKGlId8YrX6MHEADKy2WIVjAg0WI9ie0EG3OUJDtFqOxsD7AWTWwsF5XYKvw30cqe5JlPxpSRnXuM5kwIDAQABAoGABtGR1tszZ20eyHA5bVFjPI3mE6pYsjsIPkNppnBArbGwJNPRh9mDcuefHOhvP1fwONerxzOPIeJ1xINqIeg+SXsAzw4ElZgLci1a6l5FbmRQvAyc7+6X5G3GpyC5UPzV3uKwNWW9SpQeVbCVIbAahu8ZVj8LbhawcH/dj7tRR5ECQQCpzLOYK7KjT92pbfrNjaPdlrPhfzxXucCY65RyUyJl98fe8tmdnjsAJoFv3TLh94RDBs8ryfMZ4Ym4ukDvi+alAkEAxGxbGs6SHmnUJkvBZwxest7XnALAddl/HjJwyXS0r7wqTomfi9JxV+AhE2vAaW4tZcQr9y3/Neek89+oFgBh1wJAdlYtS/4YT2zXxL7bLepqq4Hd92ffPBw+t9Rm7o41yO64ow6Izyp5YA914eo9DfKcgMH8HD5waDcg7lcP7mKH6QJAVDRbbgeGTnFx2CT7uTBtXGL5rVDkruDZhNl8znAwkXGp9Vc8RVWm71QO+eNkbg4keg76BhH66WHvrfiAd0YcqwJAO3/zvLOlh7qDCpGctxYEdKSrl7w9eSnCisWCL5v8mrxiFV9aK0h8N+AZayDHjYNJL4D+GqVZ7TvgHQWlJXoraw==-----END RSA PRIVATE KEY-----";
 	
-	string data = "123 data 123";
+	string data = "123 wert путин ест детей";
 	
 	byte[] dataEncr = RSA.encrypt(publicKey, Encoding.UTF8.GetBytes(data));
 	Console.WriteLine("dataEncr base64: " + Convert.ToBase64String(dataEncr));
@@ -136,6 +137,7 @@ class RSA {
 		return decrData;
 	}
 }
+
 
 
 class Hash {

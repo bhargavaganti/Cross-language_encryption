@@ -14,24 +14,24 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
 /** 
- * AES encryption/decryption data in Java/Android. 
+ * AES encryption/decryption data in Android
  * 
  * @author Constantine Oupirum 
- * */
+ */
 @TargetApi(Build.VERSION_CODES.GINGERBREAD)
 class AES_128 {
 	private String key = "huitka";
 	
 	/** 
-	 * @param key - 32-characters string. 
-	 * */
+	 * @param key - 32-characters string
+	 */
 	public AES_128(String key) {
 		this.key = key;
 	}
 	
 	/** 
-	 * Encryption bytes array. 
-	 * */
+	 * Encryption bytes array
+	 */
 	public byte[] encryptBytes(byte[] sourceData) {
 		try {
 			byte[] raw = key.getBytes(Charset.forName("UTF-8"));
