@@ -218,7 +218,7 @@ public class AES_128 {
 				
 				content = buffer;
 			} catch(Exception e) {
-				Log.e("Files.getFileBytes()", e.getMessage() + "");
+				Log.e("getFileBytes()", e.getMessage() + "");
 			} finally {
 				try {
 					inputStream.close();
