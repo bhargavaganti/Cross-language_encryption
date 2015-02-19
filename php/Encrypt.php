@@ -1,13 +1,11 @@
 <?
 
-require_once("./scripts/RSA/RSA.php");
+require_once("./RSA/RSA.php");
 
-
-/*
- * AES encryption/decryption string or file. 
- * Key len - 32 char. 
+/**
+ * AES encryption/decryption string or file. Key len - 32 char. <br/>
  * 
- * How to use: 
+ * How to use:
 	$data = "123 data 123";
 	$key = "12345123451234512345123451234512";
 	
@@ -28,26 +26,26 @@ class AES_128 {
 		$this->key = $key;
 	}
 	
-	/** 
-	 * Encrypt file content. 
-	 * @param sourceFile - absolute or relative path to source file. 
-	 * @param rewrite - if set true encrypted data will be saved into source file. 
-	 * @param targetFile - path to target file. If is set targetFile encrypted data will be saved into this file. 
-	 * @return encrypted file content on success, null on error. 
-	 * */
+	/**
+	 * Encrypt file content
+	 * @param string $sourceFile - absolute or relative path to source file
+	 * @param bool $rewrite - if set true encrypted data will be saved into source file
+	 * @param string $targetFile - path to target file. If is set, encrypted data will be saved into this file
+	 * @return string - encrypted file content on success, null on error
+	 */
 	public function encryptFile($sourceFile, $rewrite = false, $targetFile = null) {
 		$res = null;
 		
-		if (@is_file($sourceFile)) {
+		if (is_file($sourceFile)) {
 			@$fileContent = file_get_contents($sourceFile);
 			if ($fileContent) {
 				$encData = $this->encryptString($fileContent);
 				
 				if ($rewrite) {
-					file_put_contents($sourceFile, $encData);
+					@file_put_contents($sourceFile, $encData);
 				}
 				else if ($targetFile != null) {
-					file_put_contents($targetFile, $encData);
+					@file_put_contents($targetFile, $encData);
 				}
 				
 				$res = $encData;
@@ -57,26 +55,26 @@ class AES_128 {
 		return $res;
 	}
 	
-	/** 
-	 * Decrypt file content. 
-	 * @param sourceFile - absolute or relative path to source file. 
-	 * @param rewrite - if set true decrypted data will be saved into source file. 
-	 * @param targetFile - path to target file. If is set targetFile decrypted data will be saved into this file. 
-	 * @return decrypted file content on success, null on error. 
-	 * */
+	/**
+	 * Decrypt file content
+	 * @param string $sourceFile - absolute or relative path to source file
+	 * @param bool rewrite - if set true decrypted data will be saved into source file
+	 * @param string $targetFile - path to target file. If is set targetFile decrypted data will be saved into this file
+	 * @return string - decrypted file content on success, null on error
+	 */
 	public function decryptFile($sourceFile, $rewrite = false, $targetFile = null) {
 		$res = null;
 		
-		if (@is_file($sourceFile)) {
+		if (is_file($sourceFile)) {
 			@$fileContent = file_get_contents($sourceFile);
 			if ($fileContent) {
 				$decData = $this->decryptString($fileContent);
 				
 				if ($rewrite) {
-					file_put_contents($sourceFile, $decData);
+					@file_put_contents($sourceFile, $decData);
 				}
 				else if ($targetFile != null) {
-					file_put_contents($targetFile, $decData);
+					@file_put_contents($targetFile, $decData);
 				}
 				
 				$res = $decData;
@@ -87,10 +85,10 @@ class AES_128 {
 	}
 	
 	
-	/** 
-	 * Encrypt string data. 
-	 * @param str - string data to encrypt. 
-	 * @return encrypted string data. 
+	/**
+	 * Encrypt string data
+	 * @param string $str - string data to encrypt
+	 * @return string - encrypted
 	 */
 	public function encryptString($str) {
 		$block = mcrypt_get_block_size('rijndael_128', 'ecb');
@@ -102,10 +100,10 @@ class AES_128 {
 		return $res;
 	}
 	
-	/** 
-	 * Decrypt string data. 
-	 * @param str - string data to decrypt. 
-	 * @return decrypted string data. 
+	/**
+	 * Decrypt string data
+	 * @param string $str - string data to decrypt
+	 * @return string - decrypted
 	 */
 	public function decryptString($str) {
 		$str = mcrypt_decrypt(MCRYPT_RIJNDAEL_128, $this->key, $str, MCRYPT_MODE_ECB);
@@ -120,24 +118,25 @@ class AES_128 {
 }
 
 
-
-/*
- * RSA encryption/decryption string data. 
+/**
+ * RSA encryption/decryption string data. <br/>
  * 
  * Ho to use: 
 	$data = "123 data 123";
 	
 	$RSA = new RSA();
+	$RSA->generatePair();
 	$privateKey = $RSA->getPEMPrivate();
 	$encr = base64_encode($RSA->encrypt($data));
-	echo "\r\n encrypted: ". $encr;
+	echo "\r\n encrypted: " . $encr;
 	
-	//....
+	// ...
 	
 	$RSA = new RSA();
 	$RSA->loadPEMPrivate($privateKey);
 	$decr = $RSA->decrypt(base64_decode($encr));
-	echo "\r\n decrypted: ". $decr;
+	echo "\r\n decrypted: " . $decr;
+ * 
  */
 class RSA {
 	private $RSA = null;
@@ -148,22 +147,22 @@ class RSA {
 	function __construct() {
 		$this->RSA = new Crypt_RSA();
 		$this->RSA->setEncryptionMode(CRYPT_RSA_ENCRYPTION_PKCS1);
-		$this->generatePair();
 	}
 	
-	/** 
-	 * Encrypt string data. 
-	 * @return encrypted string on success, NULL on error. 
-	 * */
-	public function encrypt($dataString) {
+	/**
+	 * Encrypt string data
+	 * @param string $data - source data to encrypt
+	 * @return string - encrypted on success, null on error
+	 */
+	public function encrypt($data) {
 		$res = false;
 		
 		if ($this->publicKey != null) {
-			$this->RSA->loadKey($this->publicKey);
+			@$pk = openssl_pkey_get_public($this->publicKey);
 			
-			@$encr = $this->RSA->encrypt($dataString);
+			@$res = openssl_public_encrypt($data, $encr, $pk);
 			
-			if ($encr) {
+			if ($res && $encr) {
 				$res = $encr;
 			}
 		}
@@ -172,18 +171,19 @@ class RSA {
 	}
 	
 	/**
-	 * Decrypt string data.
-	 * @return decrypted string on success, NULL on error.
-	 * */
-	public function decrypt($dataString) {
+	 * Decrypt string data
+	 * @param string $data - encrypted data to decrypt
+	 * @return string decrypted on success, null on error
+	 */
+	public function decrypt($data) {
 		$res = null;
 		
 		if ($this->privateKey != null) {
-			$this->RSA->loadKey($this->privateKey);
+			@$pk = openssl_pkey_get_private($this->privateKey);
 			
-			@$decr = $this->RSA->decrypt($dataString);
+			@$res = openssl_private_decrypt($data, $decr, $pk);
 			
-			if ($decr) {
+			if ($res && $decr) {
 				$res = $decr;
 			}
 		}
@@ -192,37 +192,10 @@ class RSA {
 	}
 	
 	/**
-	 * Load public key from PEM string. 
-	 * */
-	public function loadPEMPublic($keyString) {
-		$this->publicKey = $keyString;
-	}
-	/**
-	 * Get current public key. 
-	 * @return PEM key string. 
-	 * */
-	public function getPEMPublic() {
-		return $this->publicKey;
-	}
-	
-	/** 
-	 * Load private key from PEM string. 
-	 * */
-	public function loadPEMPrivate($keyString) {
-		$this->privateKey = $keyString;
-	}
-	/**
-	 * Get current private key. 
-	 * @return PEM key string. 
-	 * */
-	public function getPEMPrivate() {
-		return $this->privateKey;
-	}
-	
-	/** 
-	 * Genearate a new RSA keys pair. 
-	 * @return array: { public: "public-key", private: "private-key" }
-	 * */
+	 * Genearate a new RSA keys pair
+	 * @return array like: <br/>
+	 * {public: string, private: string}
+	 */
 	public function generatePair() {
 		$keys = $this->RSA->createKey();
 		
@@ -231,8 +204,39 @@ class RSA {
 		
 		return array(
 				"public" => $keys["publickey"],
-				"private" => $keys["privatekey"]
-			);
+				"private" => $keys["privatekey"]);
+	}
+	
+	/**
+	 * Load public key from PEM string
+	 * @param string $keyString - PEM public key
+	 */
+	public function loadPEMPublic($keyString) {
+		$this->publicKey = $keyString;
+	}
+	
+	/**
+	 * Get current public key
+	 * @return string - PEM public key
+	 */
+	public function getPEMPublic() {
+		return $this->publicKey;
+	}
+	
+	/**
+	 * Load private key from PEM string
+	 * @param string $keyString - PEM private key
+	 */
+	public function loadPEMPrivate($keyString) {
+		$this->privateKey = $keyString;
+	}
+	
+	/**
+	 * Get current private key
+	 * @return string - PEM private key
+	 */
+	public function getPEMPrivate() {
+		return $this->privateKey;
 	}
 }
 
