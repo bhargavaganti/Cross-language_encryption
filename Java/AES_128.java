@@ -1,4 +1,4 @@
-package com.test.fullscreen;
+package pro.elandis.client.libs;
 
 import android.annotation.TargetApi;
 import android.os.Build;
@@ -13,24 +13,24 @@ import java.nio.charset.Charset;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
-/** 
- * AES encryption/decryption data in Android
+/**
+ * AES encryption/decryption data in Java/Android. 
  * 
  * @author Constantine Oupirum 
  */
 @TargetApi(Build.VERSION_CODES.GINGERBREAD)
-class AES_128 {
+public class AES_128 {
 	private String key = "huitka";
 	
-	/** 
-	 * @param key - 32-characters string
+	/**
+	 * @param key - 32-chars string. 
 	 */
 	public AES_128(String key) {
 		this.key = key;
 	}
 	
-	/** 
-	 * Encryption bytes array
+	/**
+	 * Encryption bytes array. 
 	 */
 	public byte[] encryptBytes(byte[] sourceData) {
 		try {
@@ -38,19 +38,19 @@ class AES_128 {
 			SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES");
 			Cipher cipher = Cipher.getInstance("AES");
 			cipher.init(Cipher.ENCRYPT_MODE, skeySpec);
-
+			
 			byte[] encrypted = cipher.doFinal(sourceData);
-
+			
 			return encrypted;
 		} catch (Exception e) {
 			e.printStackTrace();
-			return null;
 		}
+		return null;
 	}
 	
-	/** 
-	 * Decryption bytes array. 
-	 * */
+	/**
+	 * Decrypt array of bytes
+	 */
 	public byte[] decryptBytes(byte[] encryptedData) {
 		try {
 			byte[] raw = key.getBytes(Charset.forName("UTF-8"));
@@ -63,34 +63,36 @@ class AES_128 {
 			return decrypted;
 		} catch (Exception e) {
 			e.printStackTrace();
-			return null;
 		}
+		return null;
 	}
 	
 	
-	/** 
-	 * Encryption file. 
+	/**
+	 * Encrypt file. 
 	 * @param path - absolute or relative path to source file. 
 	 * @return byte array on success, NULL on error. 
-	 * */
+	 */
 	public byte[] encryptFile(String path) {
 		return encryptF(path, false, null);
 	}
-	/** 
-	 * Encryption file. 
+	
+	/**
+	 * Encrypt file. 
 	 * @param path - absolute or relative path to source source file. 
 	 * @param rewrite - set true for saving encrypted data into same file. 
 	 * @return byte array on success, NULL on error. 
-	 * */
+	 */
 	public byte[] encryptFile(String path, boolean rewrite) {
 		return encryptF(path, rewrite, null);
 	}
-	/** 
-	 * Encryption file. 
+	
+	/**
+	 * Encrypt file
 	 * @param pathSource - absolute or relative path to source file. 
 	 * @param pathTarget - absolute or relative path to target file. Encrypted data will be saved into this file. 
 	 * @return byte array on success, NULL on error. 
-	 * */
+	 */
 	public byte[] encryptFile(String pathSource, String pathTarget) {
 		return encryptF(pathSource, false, pathTarget);
 	}
@@ -119,29 +121,31 @@ class AES_128 {
 		return encrypted;
 	}
 	
-	/** 
-	 * Decryption file. 
+	/**
+	 * Decrypt file
 	 * @param path - absolute or relative path to source file. 
 	 * @return byte array on success, NULL on error. 
-	 * */
+	 */
 	public byte[] decryptFile(String path) {
 		return decryptF(path, false, null);
 	}
-	/** 
-	 * Decryption file. 
+	
+	/**
+	 * Decrypt file
 	 * @param path - absolute or relative path to source source file. 
 	 * @param rewrite - set true for saving decrypted data into same file. 
 	 * @return byte array on success, NULL on error. 
-	 * */
+	 */
 	public byte[] decryptFile(String path, boolean rewrite) {
 		return decryptF(path, rewrite, null);
 	}
-	/** 
-	 * Decryption file. 
+	
+	/**
+	 * Decrypt file
 	 * @param pathSource - absolute or relative path to source file. 
 	 * @param pathTarget - absolute or relative path to target file. Decrypted data will be saved into this file. 
 	 * @return byte array on success, NULL on error. 
-	 * */
+	 */
 	public byte[] decryptFile(String pathSource, String pathTarget) {
 		return decryptF(pathSource, false, pathTarget);
 	}
@@ -171,25 +175,29 @@ class AES_128 {
 	}
 	
 	
-	
 	public static boolean saveFileBytes(byte[] bytes, String path) {
 		boolean res = false;
 		
-		FileOutputStream outStream = null;
-		try {
-			outStream = new FileOutputStream(path);
-			outStream.write(bytes);
-			outStream.flush();
-			
-			if ((new File(path)).isFile()) {
-				res = true;
-			}
-		} catch(Exception e) {
-			Log.e("saveFileBytes", e.getMessage() + "");
-		} finally {
+		if ((bytes != null) && (path != null)) {
+			FileOutputStream outStream = null;
 			try {
-				outStream.close();
-			} catch (IOException e) {}
+				outStream = new FileOutputStream(path);
+				outStream.write(bytes);
+				outStream.flush();
+				
+				if ((new File(path)).isFile()) {
+					res = true;
+				}
+			} catch(Exception e) {
+				e.printStackTrace();
+			} finally {
+				if (outStream != null) {
+					try {
+						outStream.close();
+					} catch (IOException e) {}
+					outStream = null;
+				}
+			}
 		}
 		
 		return res;
@@ -210,16 +218,15 @@ class AES_128 {
 				
 				content = buffer;
 			} catch(Exception e) {
-				Log.e("getFileContent", e.getMessage() + "");
+				Log.e("Files.getFileBytes()", e.getMessage() + "");
 			} finally {
 				try {
 					inputStream.close();
-				} catch (IOException e) {}
+				} catch (IOException e0) {}
+				inputStream = null;
 			}
 		}
 		
 		return content;
 	}
 }
-
-
