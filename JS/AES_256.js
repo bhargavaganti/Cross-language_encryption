@@ -1,6 +1,6 @@
 
 /**
- * AES-256 EBC encryption/decryption 
+ * AES-256 ECB encryption/decryption 
  * 
  * Other required libs: 
 	- CryptoJS_AES.js
