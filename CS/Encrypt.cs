@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
@@ -11,17 +11,17 @@ using System.Text;
  
  * How to use: 
 	string data = "123 wert путин ест детей";
-	AES_128 aes = new AES_128("ABC12345123451234512345123451234");
+	AES_256 aes = new AES_256("ABC12345123451234512345123451234");
 	byte[] encr = aes.encrypt(Encoding.UTF8.GetBytes(data));
 	Console.WriteLine("encrypted base64: " + Convert.ToBase64String(encr));
 	
 	byte[] decr = aes.decrypt(encr);
 	Console.WriteLine("decrypted: " + Encoding.UTF8.GetString(decr));
  */
-class AES_128 {
+class AES_256 {
 	private string key;
 	
-	public AES_128(string key) {
+	public AES_256(string key) {
 		this.key = key;
 	}
 	
@@ -29,7 +29,7 @@ class AES_128 {
 		byte[] res = null;
 		
 		try {
-			res = this.encryptBytesAES128(data);
+			res = this.encryptBytesAES256(data);
 		} catch(Exception e) {
 			Console.WriteLine("Error on AES encryption: " + e.Message);
 		}
@@ -41,7 +41,7 @@ class AES_128 {
 		byte[] res = null;
 		
 		try {
-			res = this.decryptBytesAES128(encryptedData);
+			res = this.decryptBytesAES256(encryptedData);
 		} catch(Exception e) {
 			Console.WriteLine("Error on AES decryption: " + e.Message);
 		}
@@ -49,7 +49,7 @@ class AES_128 {
 		return res;
 	}
 	
-	private RijndaelManaged configAES128() {
+	private RijndaelManaged configAES256() {
 		byte[] keyBytes = Encoding.UTF8.GetBytes(this.key);
 		
 		RijndaelManaged rjnd = new RijndaelManaged();
@@ -60,8 +60,8 @@ class AES_128 {
 		return rjnd;
 	}
 	
-	private byte[] encryptBytesAES128(byte[] data) {
-		RijndaelManaged rjnd = configAES128();
+	private byte[] encryptBytesAES256(byte[] data) {
+		RijndaelManaged rjnd = configAES256();
 		ICryptoTransform transform = rjnd.CreateEncryptor();
 		
 		byte[] resultBytes = transform.TransformFinalBlock(data, 0, data.Length);
@@ -69,8 +69,8 @@ class AES_128 {
 		return resultBytes;
 	}
 	
-	private byte[] decryptBytesAES128(byte[] encryptedData) {
-		RijndaelManaged rjnd = configAES128();
+	private byte[] decryptBytesAES256(byte[] encryptedData) {
+		RijndaelManaged rjnd = configAES256();
 		
 		ICryptoTransform transform = rjnd.CreateDecryptor();
 		byte[] resultBytes = transform.TransformFinalBlock(encryptedData, 0, encryptedData.Length);
