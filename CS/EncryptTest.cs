@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,7 +12,7 @@ namespace test_upload_0 {
 			 */
 			Console.WriteLine("test AES");
 			string data = "123 wert путин ест детей";
-			AES_128 aes = new AES_128("ABC12345123451234512345123451234");
+			AES_256 aes = new AES_256("ABC12345123451234512345123451234");
 			byte[] encr = aes.encrypt(Encoding.UTF8.GetBytes(data));
 			Console.WriteLine("encrypted base64: " + Convert.ToBase64String(encr));
 
