@@ -9,7 +9,7 @@ require_once("./RSA/RSA.php");
 	$data = "123 data 123";
 	$key = "12345123451234512345123451234512";
 	
-	$AES = new AES_128($key);
+	$AES = new AES_256($key);
 	
 	$aesEncr = base64_encode($AES->encryptString($data));
 	echo "\r\n encrypted & base64-encoded: ". $aesEncr;
@@ -19,7 +19,7 @@ require_once("./RSA/RSA.php");
 	$AES->encryptFile("./f/sign.gif", false, "./f/sign_0.gif");
 	$AES->decryptFile("./f/sign_0.gif", true);
  */
-class AES_128 {
+class AES_256 {
 	private $key = "huitka";
 	
 	function __construct($key) {
@@ -91,11 +91,11 @@ class AES_128 {
 	 * @return string - encrypted
 	 */
 	public function encryptString($str) {
-		$block = mcrypt_get_block_size('rijndael_128', 'ecb');
+		$block = mcrypt_get_block_size('rijndael_256', 'ecb');
 		$pad = $block - (strlen($str) % $block);
 		$str .= str_repeat(chr($pad), $pad);
 		
-		$res = mcrypt_encrypt(MCRYPT_RIJNDAEL_128, $this->key, $str, MCRYPT_MODE_ECB);
+		$res = mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $this->key, $str, MCRYPT_MODE_ECB);
 		
 		return $res;
 	}
@@ -106,9 +106,9 @@ class AES_128 {
 	 * @return string - decrypted
 	 */
 	public function decryptString($str) {
-		$str = mcrypt_decrypt(MCRYPT_RIJNDAEL_128, $this->key, $str, MCRYPT_MODE_ECB);
+		$str = mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $this->key, $str, MCRYPT_MODE_ECB);
 		
-		$block = mcrypt_get_block_size('rijndael_128', 'ecb');
+		$block = mcrypt_get_block_size('rijndael_256', 'ecb');
 		$pad = ord($str[($len = strlen($str)) - 1]);
 		$len = strlen($str);
 		$pad = ord($str[$len-1]);
