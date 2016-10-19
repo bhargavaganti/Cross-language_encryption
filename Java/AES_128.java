@@ -19,13 +19,13 @@ import javax.crypto.spec.SecretKeySpec;
  * @author Constantine Oupirum 
  */
 @TargetApi(Build.VERSION_CODES.GINGERBREAD)
-public class AES_128 {
+public class AES_256 {
 	private String key = "huitka";
 	
 	/**
 	 * @param key - 32-chars string. 
 	 */
-	public AES_128(String key) {
+	public AES_256(String key) {
 		this.key = key;
 	}
 	
